@@ -10,6 +10,9 @@ import Image
 import Ray
 import Objects
 
+import Data.Maybe
+import Debug.Trace
+
 defaultBackground :: Ray -> Pixel
 defaultBackground ray = let
   unit = normalise $ direction ray
@@ -37,4 +40,4 @@ color :: Scene -> Ray -> Pixel
 color scene ray = let
   haveHit = Objects.hit ray
   hits = [haveHit object | object <- objects scene]
-  in if or hits then (255, 0, 0) else background scene ray
+  in if any isJust hits then Debug.Trace.trace (show hits) (1, 0, 0) else background scene ray
