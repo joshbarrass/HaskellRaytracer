@@ -9,9 +9,10 @@ import Vector
 import Image
 import Ray
 import Objects
+import Hit
 
 import Data.Maybe
-import Debug.Trace
+import Data.List
 
 defaultBackground :: Ray -> Pixel
 defaultBackground ray = let
@@ -39,5 +40,8 @@ render scene (width, height) = let
 color :: Scene -> Ray -> Pixel
 color scene ray = let
   haveHit = Objects.hit ray
-  hits = [haveHit object | object <- objects scene]
-  in if any isJust hits then Debug.Trace.trace (show hits) (1, 0, 0) else background scene ray
+  hits = catMaybes [haveHit object | object <- objects scene]
+  in case hits of [] -> background scene ray
+                  xs -> let closest = head (sortOn t xs)
+                            n = normal closest
+                            in 0.5 `scale ` (n `vadd` (1, 1, 1))
