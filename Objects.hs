@@ -17,8 +17,8 @@ solveQuadratic a b c
   where discriminant = b*b - 4*a*c
   
 
-hit :: Ray -> Object -> Maybe Hit
-hit (Ray a b) (Sphere r c) = let
+hit :: Ray -> Float -> Float -> Object -> Maybe Hit
+hit (Ray a b) tmin tmax (Sphere r c) = let
   ac = a `vsub` c
   -- Construct quadratic equation in t
   -- t^2 B.B + 2t B.(A-C) + (A-C).(A-C) - R*R
@@ -30,7 +30,10 @@ hit (Ray a b) (Sphere r c) = let
   qc = ac `dot` ac - r*r
   solutions = solveQuadratic qa qb qc
   in case solutions of Nothing -> Nothing
-                       Just (t1, t2) -> let t = min t1 t2
+                       Just (t1, t2) -> let validTs = filter (\t -> (t >= tmin) && (t <= tmax)) [t1, t2]
+                                            in if null validTs then Nothing
+                                        else let
+                                            t = minimum validTs
                                             hitPos = a `vadd` (t `scale` b)
                                             normal = normalise $ hitPos `vsub` c
                                         in Just $ Hit hitPos normal t
